@@ -30,4 +30,9 @@ apps/static/assets/yarn.lock
 apps/static/assets/.temp
 
 # Pycharm
-*.idea/
+.idea/
+
+# Files
+temporary/
+media/
+migrations/
