@@ -15,4 +15,5 @@ urlpatterns = [
     path("home/", include("apps.home.urls")),             # UI Kits Html files
     path("insert/", include("apps.insert.urls")),
     path("viewer/", include("apps.viewer.urls")),
+    path("table/", include("apps.table.urls")),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

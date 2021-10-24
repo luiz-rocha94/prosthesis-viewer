@@ -1,0 +1,51 @@
+{% extends 'layouts/base.html' %}
+{% load home_extras %}
+
+{% block title %} Tables {% endblock title %}
+
+{% block content %}
+  <!-- Page content -->
+  <div class="container-fluid mt--2">
+    <div class="row">
+      <div class="col">
+        <div class="card">
+          <!-- Card header -->
+          <div class="card-header border-0">
+            <h3 class="mb-0">Info</h3>
+          </div>
+          <!-- Light table -->
+          <div class="table-responsive">
+            <table class="table align-items-center table-flush">
+              <thead class="thead-light">
+                <tr>
+                  <th scope="col">name</th>
+                  <th scope="col">study</th>
+                  <th scope="col">slices</th>
+                </tr>
+              </thead>
+              <tbody class="list">
+                {% list_all as table %}
+                {% for row in table %}
+                <tr>
+                    {% for col in row %}
+                    <td>
+                        {{ col }}
+                    </td>
+                    {% endfor %}
+                </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+          <!-- Card footer -->
+        </div>
+      </div>
+    </div>
+    {% include "includes/footer.html" %}
+
+  </div>
+
+{% endblock content %}
+
+<!-- Specific JS goes HERE --> 
+{% block javascripts %}{% endblock javascripts %}

@@ -31,7 +31,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'apps.home',  # Enable the inner home (home)
     'apps.insert',
-    'apps.viewer'
+    'apps.viewer',
+    'apps.table'
 ]
 
 MIDDLEWARE = [
