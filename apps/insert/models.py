@@ -13,6 +13,7 @@ def models_directory_path(instance, filename):
 
 class Tomography(models.Model):
     study = models.CharField(max_length=30)
+    prosthesis = models.BooleanField()
     y_spacing = models.FloatField()
     x_spacing = models.FloatField()
     thickness = models.FloatField()
@@ -34,7 +35,6 @@ def files_directory_path(instance, filename):
 
 class Image(models.Model):
     slice = models.FloatField()
-    shape = models.BooleanField()
     image = models.FileField(upload_to=images_directory_path, max_length=260)
     file = models.FileField(upload_to=files_directory_path, max_length=260)
     tomography = models.ForeignKey(Tomography, on_delete=models.CASCADE)

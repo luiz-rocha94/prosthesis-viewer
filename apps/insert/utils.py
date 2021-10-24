@@ -14,14 +14,16 @@ def get_volume(name, study):
     images = models.Image.objects.filter(tomography__patient__name=name,
                                          tomography__study=study).order_by('slice')
 
-    volume = np.zeros((len(images), 512, 512, 1), dtype=np.load(images[0].file.path).dtype)
-    for idx, image in enumerate(images):
-        volume[idx, :, :, 0] = np.load(image.file.path)
+    volume = np.zeros((0, 512, 512, 1), dtype=np.load(images[0].file.path).dtype)
+    for image in images:
+        data = np.expand_dims(np.load(image.file.path), (0,-1))
+        if np.sum(data):
+            volume = np.vstack([volume, data])
 
     return volume, image.tomography
 
 
-def update_model(name, study, directory, pre_processing=True):
+def upload_model(name, study, directory, pre_processing=True):
     volume, tomography = get_volume(name, study)
     if pre_processing:
         volume = segment(volume)
@@ -35,6 +37,23 @@ def update_model(name, study, directory, pre_processing=True):
 
     tomography.model = model_file_object
     tomography.save()
+
+    model_file_object.close()
+
+
+def upload_image(np_file, img_file, slice_loc, tomography):
+    np_file_object = File(open(np_file, 'rb'))
+    np_file_object.name = os.path.basename(np_file_object.name)
+
+    img_file_object = File(open(img_file, 'rb'))
+    img_file_object.name = os.path.basename(img_file_object.name)
+
+    image = {'slice': slice_loc, 'tomography': tomography}
+    defaults = {'file': np_file_object, 'image': img_file_object}
+    models.Image.objects.get_or_create(**image, defaults=defaults)
+
+    np_file_object.close()
+    img_file_object.close()
 
 
 def insert_data(zip_file):
@@ -61,13 +80,13 @@ def insert_data(zip_file):
             study = f"{ds.get('SeriesDescription')} {ds.get('SeriesNumber')}"
             y_spacing, x_spacing = [round(float(x), 3) for x in ds.get('PixelSpacing')]
             thickness = round(float(ds.get('SliceThickness')), 3)
-            tomography = {'study': study, 'patient': patient,
-                          'y_spacing': y_spacing, 'x_spacing': x_spacing,
-                          'thickness': thickness}
-            tomography = models.Tomography.objects.get_or_create(**tomography)[0]
+            tomography = {'study': study, 'patient': patient}
+            defaults = {'y_spacing': y_spacing, 'x_spacing': x_spacing, 'thickness': thickness,
+                        'prosthesis': False}
+            tomography = models.Tomography.objects.get_or_create(**tomography, defaults=defaults)[0]
 
             # Salva o nome e o estudo
-            inserts.append((name, study))
+            inserts.append((name, study, os.path.dirname(file)))
 
             # Obtém os dados da camada
             slice_loc = round(float(ds.get('SliceLocation')), 3)
@@ -84,20 +103,12 @@ def insert_data(zip_file):
             Image.fromarray(data).convert('L').save(img_file)
 
             # Cadastra a imagem
-            np_file_object = File(open(np_file, 'rb'))
-            np_file_object.name = os.path.basename(np_file_object.name)
+            upload_image(np_file, img_file, slice_loc, tomography)
 
-            img_file_object = File(open(img_file, 'rb'))
-            img_file_object.name = os.path.basename(img_file_object.name)
-
-            image = {'slice': slice_loc, 'shape': shape, 'tomography': tomography}
-            models.Image.objects.get_or_create(**image, file=np_file_object, image=img_file_object)
-
-    inserts = set(inserts)
-    with temporary_dir() as directory:
+        inserts = set(inserts)
         # Cria o volume.
-        for name, study in inserts:
-            update_model(name, study, directory)
+        for name, study, sub_dir in inserts:
+            upload_model(name, study, sub_dir)
 
 
 def create_data(name, study, angle, center):
@@ -111,11 +122,12 @@ def create_data(name, study, angle, center):
     volume = create_prosthesis(volume, angle, center)
 
     # Cadastra o estudo
-    new_study = f'{study} prosthesis'
-    tomography = {'study': new_study,
-                  'y_spacing': tomography.y_spacing, 'x_spacing': tomography.x_spacing,
-                  'thickness': tomography.thickness, 'patient': tomography.patient}
-    tomography = models.Tomography.objects.get_or_create(**tomography)[0]
+    number = len(models.Tomography.objects.filter(patient__name=name, study__startswith=study, prosthesis=True))
+    new_study = f'{study} prosthesis {number}'
+    defaults = {'y_spacing': tomography.y_spacing, 'x_spacing': tomography.x_spacing, 'thickness': tomography.thickness,
+                'prosthesis': True}
+    tomography = {'study': new_study, 'patient': tomography.patient}
+    tomography = models.Tomography.objects.get_or_create(**tomography, defaults=defaults)[0]
 
     with temporary_dir() as directory:
         for slice_loc, data in enumerate(volume):
@@ -129,15 +141,6 @@ def create_data(name, study, angle, center):
             Image.fromarray(data).convert('L').save(img_file)
 
             # Cadastra a imagem
-            np_file_object = File(open(np_file, 'rb'))
-            np_file_object.name = os.path.basename(np_file_object.name)
+            upload_image(np_file, img_file, slice_loc*tomography.thickness, tomography)
 
-            img_file_object = File(open(img_file, 'rb'))
-            img_file_object.name = os.path.basename(img_file_object.name)
-
-            image = {'slice': slice_loc*tomography.thickness, 'shape': True, 'tomography': tomography}
-            models.Image.objects.get_or_create(**image, file=np_file_object,
-                                               image=img_file_object)
-
-    with temporary_dir() as directory:
-        update_model(name, new_study, directory, False)
+        upload_model(name, new_study, directory, False)
