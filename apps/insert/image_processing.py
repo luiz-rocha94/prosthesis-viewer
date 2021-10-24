@@ -9,6 +9,9 @@ import os
 
 BASE_DIR = Path(__file__).resolve().parent
 
+physical_devices = tf.config.experimental.list_physical_devices('GPU')
+tf.config.experimental.set_memory_growth(physical_devices[0], True)
+
 
 def segment(volume, thr=1500):
     label_segment, max_label = measure.label(volume >= thr, return_num=True)
@@ -79,7 +82,7 @@ def create_prosthesis(volume, angle, center, slices=0, step=10):
     new_slices = np.arange(0, volume.shape[0], 1)
     new_crops = cs(new_slices).astype('int32')
 
-    vae = tf.keras.models.load_model(os.path.join(BASE_DIR, 'static/networks/vae'))
+    vae = tf.keras.models.load_model(os.path.join(BASE_DIR, 'networks', 'vae'))
 
     vol_in = np.zeros(volume.shape, dtype='float32')
     vol_out = np.zeros(volume.shape, dtype='float32')

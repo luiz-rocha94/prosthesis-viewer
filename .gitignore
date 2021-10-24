@@ -36,3 +36,4 @@ apps/static/assets/.temp
 temporary/
 media/
 migrations/
+apps/insert/networks/vae
