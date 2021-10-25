@@ -26,9 +26,9 @@
                   <div class="form-group">
                     <label class="form-control-label" for="input-name">Name</label>
                     <select name="name" id="input-name" class="form-control">
-                        {% list_names as names %}
-                        {% for name in names %}
-                            <option value="{{ name }}">{{ name }}</option>
+                        {% list_studies as studies %}
+                        {% for study in studies %}
+                            <option value="{{ study.0 }}">{{ study.0 }}</option>
                         {% endfor %}
                     </select>
                   </div>
@@ -37,15 +37,17 @@
                   <div class="form-group">
                     <label class="form-control-label" for="input-study">Study</label>
                     <select name="study" id="input-study" class="form-control">
-                        {% list_studies as studies %}
                         {% for study in studies %}
-                            <option value="{{ study }}">{{ study }}</option>
+                            <option value="{{ study.1 }}">{{ study.1 }}</option>
                         {% endfor %}
                     </select>
                   </div>
                 </div>
                 <div class="col-lg-3">
-                    <input type="submit" class="btn btn-primary">
+                    <div class="form-group">
+                        <br>
+                        <input type="submit" id="input-button" class="btn btn-primary" value="Search">
+                    </div>
                 </div>
               </div>
             </div>
@@ -54,15 +56,15 @@
           {% if model %}
           <div class="pl-lg-2">
               <div class="row">
-                <div class="col-lg-9">
-                    <label class="form-control-label" for="input-study">3D View</label>
+                <div class="col-lg-8">
+                    <label class="form-control-label">3D View</label>
                     <model-viewer src="{{ model }}" alt="A 3D model" camera-controls
                                       style="height: 80vh; width: auto">
                     </model-viewer>
                 </div>
-                <div class="col-lg-3">
-                    <label class="form-control-label" for="input-study">Info</label>
-                    <div style="height: 20vh;">
+                <div class="col-lg-4">
+                    <label class="form-control-label">Info</label>
+                    <div style="height: 25vh;">
                         <ul>
                             {% for key, value in meta.items %}
                                 <li>
@@ -71,10 +73,12 @@
                             {% endfor %}
                         </ul>
                     </div>
-                    <div style="height: 60vh; overflow-y: scroll;">
+                    <label class="form-control-label">Slices</label>
+                    <div style="height: 55vh; overflow-y: scroll;">
                         <div>
                             {% for file in files %}
-                                <img src="{{ file }}" alt="tc" style="height: 100%; width: 100%">
+                                <img src="{{ file.0 }}" alt="tc" style="height: 100%; width: 100%; padding: 2px">
+                                <p>Slice: {{ file.1 }}</p>
                             {% endfor %}
                         </div>
                     </div>

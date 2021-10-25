@@ -4,7 +4,7 @@ from apps.insert import models
 def get_files(name, study):
     query = models.Image.objects.filter(tomography__patient__name=name,
                                         tomography__study=study).order_by('slice')
-    files = [q.image.url for q in query]
+    files = [(q.image.url, i) for i, q in enumerate(query)]
     tomo = query[0].tomography
     meta = {'name': name, 'study': study, 'slices': len(files),
             'y_spacing': tomo.y_spacing, 'x_spacing': tomo.x_spacing,
