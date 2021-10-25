@@ -11,10 +11,10 @@ class New(View):
 
     def post(self, request):
         context = {'segment': 'new'}
-        file = request.FILES.get('zipfile')
-        if file:
+        if request.POST.get('upload'):
+            file = request.FILES.get('zipfile')
             utils.insert_data(file)
-        else:
+        elif request.POST.get('create'):
             angle0 = int(request.POST.get('angle-0', 5))
             angle1 = int(request.POST.get('angle-1', 30))
             center_y = int(request.POST.get('center-y', 256))

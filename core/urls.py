@@ -10,9 +10,9 @@ from django.conf import settings
 
 
 urlpatterns = [
-    path('admin/', admin.site.urls),          # Django admin route
-    path("", include("apps.authentication.urls")), # Auth routes - login / register
-    path("home/", include("apps.home.urls")),             # UI Kits Html files
+    path('admin/', admin.site.urls),                # Django admin route
+    path("", include("apps.authentication.urls")),  # Auth routes - login / register
+    path("home/", include("apps.home.urls")),       # UI Kits Html files
     path("insert/", include("apps.insert.urls")),
     path("viewer/", include("apps.viewer.urls")),
     path("table/", include("apps.table.urls")),

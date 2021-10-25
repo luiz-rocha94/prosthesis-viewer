@@ -9,33 +9,51 @@
     <div class="row">
       <div class="col">
         <div class="card">
-          <!-- Card header -->
-          <div class="card-header border-0">
-            <h3 class="mb-0">Info</h3>
-          </div>
-          <!-- Light table -->
-          <div class="table-responsive">
-            <table class="table align-items-center table-flush">
-              <thead class="thead-light">
-                <tr>
-                  <th scope="col">name</th>
-                  <th scope="col">study</th>
-                  <th scope="col">slices</th>
-                </tr>
-              </thead>
-              <tbody class="list">
-                {% list_all as table %}
-                {% for row in table %}
-                <tr>
-                    {% for col in row %}
-                    <td>
-                        {{ col }}
-                    </td>
+          <div class="card-body">
+              <form action="" method="post" enctype="multipart/form-data">
+              {% csrf_token %}
+              <!-- Card header -->
+              <h6 class="heading-small text-muted mb-4">Info</h6>
+              <div class="pl-lg-4">
+                <div class="row">
+                  <div class="col-lg-3">
+                    <input type="submit" class="btn btn-primary" value="Delete selected">
+                  </div>
+                </div>
+              </div>
+              <hr class="my-4" />
+              <!-- Light table -->
+              <div class="table-responsive">
+                <table class="table align-items-center table-flush">
+                  <thead class="thead-light">
+                    <tr>
+                      <th scope="col">name</th>
+                      <th scope="col">study</th>
+                      <th scope="col">slices</th>
+                      <th scope="col">delete</th>
+                    </tr>
+                  </thead>
+                  <tbody class="list">
+                    {% list_all as table %}
+                    {% for row in table %}
+                    <tr>
+                        {% for col in row %}
+                        <td>
+                            {{ col }}
+                        </td>
+                        {% endfor %}
+                        <td>
+                            <div class="custom-control custom-checkbox mb-3">
+                              <input class="custom-control-input" id="check-{{ row.0 }}-{{row.1}}" name="{{ row.0 }}&{{row.1}}" type="checkbox">
+                              <label class="custom-control-label" for="check-{{ row.0 }}-{{row.1}}"></label>
+                            </div>
+                        </td>
+                    </tr>
                     {% endfor %}
-                </tr>
-                {% endfor %}
-              </tbody>
-            </table>
+                  </tbody>
+                </table>
+              </div>
+              </form>
           </div>
           <!-- Card footer -->
         </div>
